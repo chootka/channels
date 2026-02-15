@@ -16,13 +16,19 @@ Each mesh channel maps to a distinct agent — conversational, generative, or ar
 
 ## Control system
 
-Any mesh node can issue `!` commands to swap agent personas, change access modes, and manage the network. Three access modes:
+Any mesh node can issue `!` commands to swap agent personas, change access modes, and manage the network.
 
-- **admin_channel** (default) — only commands sent on the admin channel are accepted
-- **allowlist** — commands accepted from specific node IDs (plus the admin channel)
-- **anarchy** — any node can issue commands on any channel
+### Access modes
 
-A banlist is enforced in all modes.
+Switch modes with `!mode <mode>` on the sysop channel.
+
+- **admin_channel** (default) — `!` commands only work on the sysop channel. Regular channels ignore commands entirely.
+- **allowlist** — sysop channel always works, plus specific nodes can issue commands on any channel. Add nodes one at a time with `!allow <node_id>` (e.g. `!allow !a]b4c8d0`). There's no bulk add — run `!allow` once per node.
+- **anarchy** — every node can issue commands on every channel. Anyone can swap personas, reset prompts, etc.
+
+The **banlist** is enforced in all modes, including anarchy. A banned node's commands are rejected everywhere. Use `!ban` / `!unban` to manage it.
+
+The **warn** system is an escalating penalty: first warn puts a node on 5s cooldown (messages silently dropped), second warn is 30s, third warn auto-bans. Warn counts persist across restarts; cooldown timers don't.
 
 ### Commands
 
