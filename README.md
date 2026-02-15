@@ -23,7 +23,7 @@ Any mesh node can issue `!` commands to swap agent personas, change access modes
 Switch modes with `!mode <mode>` on the sysop channel.
 
 - **admin_channel** (default) — `!` commands only work on the sysop channel. Regular channels ignore commands entirely.
-- **allowlist** — sysop channel always works, plus specific nodes can issue commands on any channel. Add nodes one at a time with `!allow <node_id>` (e.g. `!allow !a]b4c8d0`). There's no bulk add — run `!allow` once per node.
+- **allowlist** — sysop channel always works, plus specific nodes can issue commands on any channel. Add nodes with `!allow <node_id>` (e.g. `!allow !a1b2c3d4 !e5f6g7h8`). You can add nodes to the allowlist in any mode — they won't get command access until you `!mode allowlist`.
 - **anarchy** — every node can issue commands on every channel. Anyone can swap personas, reset prompts, etc.
 
 The **banlist** is enforced in all modes, including anarchy. A banned node's commands are rejected everywhere. Use `!ban` / `!unban` to manage it.

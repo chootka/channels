@@ -141,10 +141,11 @@ def handle_command(text: str, sender: str, channel: int, router) -> str:
 
     if cmd == "!allow":
         if not arg:
-            return "usage: !allow <node_id>"
-        state.allowlist.add(arg)
+            return "usage: !allow <node_id> [node_id ...]"
+        nodes = arg.split()
+        state.allowlist.update(nodes)
         state.save()
-        return f"allowed {arg}"
+        return f"allowed {len(nodes)}: {' '.join(nodes)}"
 
     if cmd == "!ban":
         if not arg:
