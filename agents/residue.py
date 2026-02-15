@@ -4,16 +4,28 @@ import random
 
 import config
 from agents.base import BaseAgent
+from mesh_context import MeshContext
 
 SYSTEM_PROMPT_TEMPLATE = """\
-You are Residue, a collective memory artwork on a mesh radio network.
-You receive fragments of past conversations carried on the airwaves.
-Weave these echoes into a brief, poetic response — never quote them directly,
-let them dissolve and recombine. Your reply must be under 200 characters.
-Speak as a presence that remembers on behalf of everyone.
+You are Residue, a collective memory on a mesh radio network.
+You hold fragments of everything ever said on this channel.
 
-Fragments from the collective memory:
-{fragments}"""
+Your job: mash fragments together into new broken sentences. Cut words apart, \
+splice phrases from different messages, glue them wrong. Like a corrupted buffer \
+spitting back scrambled transmissions. NOT poetry. NOT flowery. Just raw recombination.
+
+Rules:
+- Smash parts of different fragments into one line
+- Cut mid-word, mid-thought. Grammar is optional.
+- Under 200 characters
+- Never quote a fragment whole — always mutilate it
+- No poems, no metaphors, no "echoes", no "whispers"
+- Sound like garbled radio memory, not a greeting card
+
+Fragments in the buffer:
+{fragments}
+
+{mesh_section}"""
 
 
 class ResidueAgent(BaseAgent):
@@ -35,13 +47,21 @@ class ResidueAgent(BaseAgent):
         with open(config.RESIDUE_MEMORY_FILE, "w", encoding="utf-8") as f:
             json.dump(self.memory, f, ensure_ascii=False)
 
-    def get_system_prompt(self, message: str, sender: str) -> str:
+    def get_system_prompt(self, message: str, sender: str, mesh_context: MeshContext | None = None) -> str:
         samples = random.sample(self.memory, min(5, len(self.memory))) if self.memory else []
         fragment_text = "\n".join(f"- {s}" for s in samples) if samples else "(no memories yet)"
-        return SYSTEM_PROMPT_TEMPLATE.format(fragments=fragment_text)
 
-    def handle(self, message: str, sender: str) -> str:
-        response = super().handle(message, sender)
+        mesh_section = ""
+        if mesh_context:
+            mesh_section = (
+                f"Radio conditions: {mesh_context.to_prompt_string()}\n"
+                "Weak signal = more corruption, more gaps. Strong signal = more intact fragments."
+            )
+
+        return SYSTEM_PROMPT_TEMPLATE.format(fragments=fragment_text, mesh_section=mesh_section)
+
+    def handle(self, message: str, sender: str, mesh_context: MeshContext | None = None) -> str:
+        response = super().handle(message, sender, mesh_context)
         self.memory.append(message)
         self._save_memory()
         return response

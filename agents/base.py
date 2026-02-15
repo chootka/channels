@@ -1,6 +1,7 @@
 import anthropic
 
 import config
+from mesh_context import MeshContext
 
 
 class BaseAgent:
@@ -10,17 +11,23 @@ class BaseAgent:
         self.max_tokens = agent_config.get("max_tokens", config.DEFAULT_MAX_TOKENS)
         self.client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
 
-    def get_system_prompt(self, message: str, sender: str) -> str:
-        return "You are a helpful assistant. Be very concise."
+    def format_mesh_context(self, ctx: MeshContext) -> str:
+        return f"\n\n[Mesh radio context: {ctx.to_prompt_string()}]"
+
+    def get_system_prompt(self, message: str, sender: str, mesh_context: MeshContext | None = None) -> str:
+        prompt = "You are a helpful assistant. Be very concise."
+        if mesh_context:
+            prompt += self.format_mesh_context(mesh_context)
+        return prompt
 
     def get_user_content(self, message: str, sender: str) -> str:
         return message
 
-    def handle(self, message: str, sender: str) -> str:
+    def handle(self, message: str, sender: str, mesh_context: MeshContext | None = None) -> str:
         response = self.client.messages.create(
             model=self.model,
             max_tokens=self.max_tokens,
-            system=self.get_system_prompt(message, sender),
+            system=self.get_system_prompt(message, sender, mesh_context),
             messages=[{"role": "user", "content": self.get_user_content(message, sender)}],
         )
         text = response.content[0].text

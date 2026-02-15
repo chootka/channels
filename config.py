@@ -9,7 +9,7 @@ DEFAULT_MODEL = "claude-sonnet-4-5-20250929"
 DEFAULT_MAX_TOKENS = 128
 
 # Rate limiting — per-sender cooldown in seconds
-RATE_LIMIT_SECONDS = int(os.environ.get("RATE_LIMIT_SECONDS", "30"))
+RATE_LIMIT_SECONDS = int(os.environ.get("RATE_LIMIT_SECONDS", "10"))
 
 # Message constraints
 MAX_MESSAGE_BYTES = 220

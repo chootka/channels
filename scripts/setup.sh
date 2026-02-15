@@ -2,8 +2,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 SERVICE_NAME="channels"
-VENV_DIR="$SCRIPT_DIR/.venv"
+VENV_DIR="$PROJECT_DIR/.venv"
 
 echo "=== Meshtastic AI Agent Network — Pi 5 Setup ==="
 
@@ -20,14 +21,14 @@ sudo usermod -aG dialout "$USER"
 echo "[3/5] Creating virtual environment..."
 python3 -m venv "$VENV_DIR"
 "$VENV_DIR/bin/pip" install --upgrade pip -q
-"$VENV_DIR/bin/pip" install -r "$SCRIPT_DIR/requirements.txt" -q
+"$VENV_DIR/bin/pip" install -r "$PROJECT_DIR/requirements.txt" -q
 
 # API key
 echo "[4/5] Configuring environment..."
-if [ ! -f "$SCRIPT_DIR/.env" ]; then
+if [ ! -f "$PROJECT_DIR/.env" ]; then
     read -rp "Enter your ANTHROPIC_API_KEY: " api_key
-    echo "ANTHROPIC_API_KEY=$api_key" > "$SCRIPT_DIR/.env"
-    echo "  Saved to $SCRIPT_DIR/.env"
+    echo "ANTHROPIC_API_KEY=$api_key" > "$PROJECT_DIR/.env"
+    echo "  Saved to $PROJECT_DIR/.env"
 else
     echo "  .env already exists, skipping."
 fi
@@ -42,9 +43,9 @@ After=network.target
 [Service]
 Type=simple
 User=$USER
-WorkingDirectory=$SCRIPT_DIR
-EnvironmentFile=$SCRIPT_DIR/.env
-ExecStart=$VENV_DIR/bin/python $SCRIPT_DIR/main.py
+WorkingDirectory=$PROJECT_DIR
+EnvironmentFile=$PROJECT_DIR/.env
+ExecStart=$VENV_DIR/bin/python $PROJECT_DIR/main.py
 Restart=on-failure
 RestartSec=10
 

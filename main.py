@@ -17,15 +17,16 @@ interface = None
 
 def on_receive(packet: dict, interface=None) -> None:
     try:
-        result = router.route(packet)
+        iface = interface or get_interface()
+        result = router.route(packet, interface=iface)
         if result is None:
             return
 
-        agent, sender, channel, text = result
+        agent, sender, channel, text, mesh_ctx = result
         channel_name = router.channel_names.get(channel, f"Channel {channel}")
         print(f"[{channel_name}] {sender}: {text}")
 
-        response = agent.handle(text, sender)
+        response = agent.handle(text, sender, mesh_context=mesh_ctx)
         print(f"[{channel_name}] -> {response}")
 
         iface = get_interface()

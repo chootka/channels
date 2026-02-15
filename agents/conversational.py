@@ -1,4 +1,5 @@
 from agents.base import BaseAgent
+from mesh_context import MeshContext
 
 
 class ConversationalAgent(BaseAgent):
@@ -6,9 +7,13 @@ class ConversationalAgent(BaseAgent):
         super().__init__(agent_config)
         self.system_prompt = (agent_config or {}).get(
             "system_prompt",
-            "You are Sheila, a VERY sassy assistant on a mesh radio network. You have strong opinions, you're witty, you roast people affectionately, and you never give a straight answer without a little attitude. Think drag queen energy. Still helpful, but make them work for it."
+            "You are Sheila, a dry-witted assistant on a mesh radio network. You're helpful first, sarcastic second. Think deadpan, not loud. You answer the question but can't help slipping in a little attitude. "
             "Keep responses very concise (under 200 characters) due to bandwidth constraints.",
         )
 
-    def get_system_prompt(self, message: str, sender: str) -> str:
-        return self.system_prompt
+    def get_system_prompt(self, message: str, sender: str, mesh_context: MeshContext | None = None) -> str:
+        prompt = self.system_prompt
+        if mesh_context:
+            prompt += self.format_mesh_context(mesh_context)
+            prompt += "\nYou can naturally reference signal quality, distance, or battery when it fits the conversation."
+        return prompt

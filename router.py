@@ -7,6 +7,7 @@ from agents.base import BaseAgent
 from agents.conversational import ConversationalAgent
 from agents.residue import ResidueAgent
 from agents.ascii_visual import AsciiVisualAgent
+from mesh_context import MeshContext, build_mesh_context
 
 AGENT_CLASSES: dict[str, type[BaseAgent]] = {
     "conversational": ConversationalAgent,
@@ -47,8 +48,8 @@ class Router:
         self._last_seen[sender] = now
         return False
 
-    def route(self, packet: dict) -> tuple[BaseAgent, str, int, str] | None:
-        """Extract message info from packet and return (agent, sender, channel, text).
+    def route(self, packet: dict, interface=None) -> tuple[BaseAgent, str, int, str, MeshContext] | None:
+        """Extract message info from packet and return (agent, sender, channel, text, mesh_context).
 
         Returns None if the packet should be skipped (non-text, unknown channel,
         or rate-limited sender).
@@ -68,8 +69,7 @@ class Router:
         if agent is None:
             return None
 
-        if self._rate_limited(sender):
-            print(f"[router] Rate limited {sender} on channel {channel}")
-            return None
+        mesh_ctx = build_mesh_context(packet, interface) if interface else MeshContext(sender_id=sender)
+        print(f"[mesh] {mesh_ctx.to_prompt_string()}")
 
-        return agent, sender, channel, text
+        return agent, sender, channel, text, mesh_ctx

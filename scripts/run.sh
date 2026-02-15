@@ -2,10 +2,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-source "$SCRIPT_DIR/.venv/bin/activate"
+source "$PROJECT_DIR/.venv/bin/activate"
 set -a
-source "$SCRIPT_DIR/.env"
+source "$PROJECT_DIR/.env"
 set +a
 
-python "$SCRIPT_DIR/main.py"
+python "$PROJECT_DIR/main.py"
