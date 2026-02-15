@@ -18,6 +18,7 @@ MAX_MESSAGE_BYTES = 220
 LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")
 LOG_FILE = os.path.join(LOG_DIR, "interactions.jsonl")
 RESIDUE_MEMORY_FILE = os.path.join(LOG_DIR, "residue_memory.json")
+CONTROL_STATE_FILE = os.path.join(LOG_DIR, "control_state.json")
 
 # Channel config
 CHANNELS_FILE = os.path.join(os.path.dirname(__file__), "channels.yaml")

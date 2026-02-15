@@ -22,6 +22,17 @@ def on_receive(packet: dict, interface=None) -> None:
         if result is None:
             return
 
+        # Control command response: (response_text, sender, channel)
+        if len(result) == 3:
+            response, sender, channel = result
+            channel_name = router.channel_names.get(channel, f"Channel {channel}")
+            print(f"[{channel_name}] {sender}: (control command)")
+            print(f"[{channel_name}] -> {response}")
+            iface = get_interface()
+            if iface:
+                iface.sendText(response, channelIndex=channel)
+            return
+
         agent, sender, channel, text, mesh_ctx = result
         channel_name = router.channel_names.get(channel, f"Channel {channel}")
         print(f"[{channel_name}] {sender}: {text}")

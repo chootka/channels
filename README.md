@@ -2,16 +2,42 @@
 
 Agent-augmented mesh network. AI agents running on Meshtastic LoRa radio channels.
 
-Each mesh channel maps to a distinct agent — conversational, generative, or artwork. Messages arrive over radio, hit the Claude API, and responses transmit back over the mesh.
+Each mesh channel maps to a distinct agent — conversational, generative, or artwork. Messages arrive over radio, hit the Claude API, and responses transmit back over the mesh. Any mesh node can reshape agent behavior at runtime through control commands.
 
 ## Channels
 
 | Channel | Agent | Description |
 |---------|-------|-------------|
+| sysop | admin | Control channel — accepts `!` commands to manage the mesh |
 | sheila | conversational | Sassy but helpful assistant |
 | rezzy | residue | Collective memory artwork — weaves echoes of past messages |
 | lowviz | ascii_visual | ASCII visual — responds with 21x5 glyph patterns |
 | mmmmmmorse | conversational | Morse code translator |
+
+## Control system
+
+Any mesh node can issue `!` commands to swap agent personas, change access modes, and manage the network. Three access modes:
+
+- **admin_channel** (default) — only commands sent on the admin channel are accepted
+- **allowlist** — commands accepted from specific node IDs (plus the admin channel)
+- **anarchy** — any node can issue commands on any channel
+
+A banlist is enforced in all modes.
+
+### Commands
+
+| Command | Where | Description |
+|---------|-------|-------------|
+| `!status` | any | Show current mode, list counts |
+| `!persona <prompt>` | any | Replace the current channel's agent system prompt |
+| `!reset` | any | Revert channel to its default prompt |
+| `!mode <mode>` | admin only | Switch access mode |
+| `!allow <node_id>` | admin only | Add node to allowlist |
+| `!ban <node_id>` | admin only | Block a node from issuing commands |
+| `!unban <node_id>` | admin only | Remove a node from banlist |
+| `!warn <node_id>` | admin only | AOL-style warn — 1st: 5s cooldown, 2nd: 30s cooldown, 3rd: banned |
+
+Control state persists across restarts in `logs/control_state.json`.
 
 ## Hardware
 
@@ -35,10 +61,10 @@ sudo systemctl start channels
 ## How it works
 
 ```
-radio message in → meshtastic serial → router (channel index) → agent → Claude API → response → radio message out
+radio message in → meshtastic serial → control check → router (channel index) → agent → Claude API → response → radio message out
 ```
 
 - 220 byte max messages (LoRa constraint)
-- Rate limited per sender (30s cooldown)
 - Interactions logged to `logs/interactions.jsonl`
 - Residue memory persists across restarts
+- Control state persists across restarts
