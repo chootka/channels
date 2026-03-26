@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Serial port — set to None for auto-detection
 SERIAL_PORT = os.environ.get("MESHTASTIC_SERIAL_PORT", None)
