@@ -41,11 +41,24 @@ class WebMistressAgent(BaseAgent):
         return prompt
 
     def handle(self, message: str, sender: str, mesh_context: MeshContext | None = None) -> str:
+        # If the user's message is already an exact command, just publish it directly
+        direct = message.strip().lower()
+        if direct in VALID_COMMANDS:
+            publish_command(direct)
+            return direct
+
+        # Otherwise ask Ollama to interpret
         response = super().handle(message, sender, mesh_context)
 
-        # Check if the response is a valid command and publish it
+        # Check if Ollama's response is a valid command
         command = response.strip().lower()
         if command in VALID_COMMANDS:
             publish_command(command)
+        else:
+            # Try to find a command word anywhere in the response
+            for cmd in VALID_COMMANDS:
+                if cmd in command:
+                    publish_command(cmd)
+                    break
 
         return response
