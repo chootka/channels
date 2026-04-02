@@ -29,15 +29,16 @@ class BaseAgent:
         system_prompt = self.get_system_prompt(message, sender, mesh_context)
         user_content = self.get_user_content(message, sender)
 
-        prompt = f"{system_prompt}\n\nUser: {user_content}\n\nAssistant:"
-
-        response = requests.post(OLLAMA_URL, json={
+        response = requests.post(OLLAMA_URL.replace("/api/generate", "/api/chat"), json={
             "model": self.model,
-            "prompt": prompt,
             "stream": False,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content},
+            ],
         })
 
-        text = response.json()["response"]
+        text = response.json()["message"]["content"]
         return self._truncate(text)
 
     @staticmethod
