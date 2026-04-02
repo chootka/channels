@@ -38,3 +38,27 @@ def publish_command(command: str) -> bool:
     except Exception as e:
         print(f"[mqtt] Failed to publish: {e}")
         return False
+
+
+def publish_text(text: str) -> bool:
+    """Publish a text message to the MQTT broker (shows up on the web app as a message)."""
+    try:
+        client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+        if MQTT_USERNAME:
+            client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
+        client.connect(MQTT_BROKER, MQTT_PORT, 60)
+
+        payload = json.dumps({
+            "id": random.randint(100000, 999999),
+            "from": 0,
+            "type": "text",
+            "payload": {"text": text},
+            "sender": "!chatter",
+        })
+
+        client.publish(MQTT_TOPIC, payload)
+        client.disconnect()
+        return True
+    except Exception as e:
+        print(f"[mqtt] Failed to publish text: {e}")
+        return False
