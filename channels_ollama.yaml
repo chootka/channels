@@ -12,7 +12,7 @@ channels:
   5:
     # CHANGED: was "residue" agent (rezzy), now "webmistress" — controls a live website via MQTT
     agent: webmistress
-    name: "web-mistress"
+    name: "webmistress"
   6:
     agent: ascii_visual
     name: "lowviz"
