@@ -89,10 +89,12 @@ class WebMistressAgent(BaseAgent):
         self._story_stop.clear()
         self._story_thread = threading.Thread(target=self._story_loop, daemon=True)
         self._story_thread.start()
+        publish_text("once upon a time...")
         return "once upon a time..."
 
     def _stop_story(self):
         self._story_stop.set()
+        publish_text("the end.")
         return "the end."
 
     def handle(self, message: str, sender: str, mesh_context: MeshContext | None = None, interface=None, channel_index: int | None = None) -> str:
