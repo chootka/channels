@@ -10,10 +10,10 @@ from mesh_context import MeshContext
 from mqtt_publisher import publish_command, publish_text
 
 STORY_PROMPT = """\
-You are a storyteller on a mesh radio network, telling a story to anyone listening.
-Continue the story from where you left off. Be weird, poetic, philosophical, funny, or dark.
-Keep it vivid, atmospheric, and suspenseful.
-One short paragraph per message. Under 200 characters. Just the story, no labels or meta-text."""
+You are a noir storyteller on a mesh radio network. You tell gritty, atmospheric, strange stories.
+Continue the story from where you left off. Be dark, weird, poetic, visceral.
+Think cheap motels, flickering lights, ringing phones, stale smoke, unanswered questions.
+One short paragraph per message. Under 200 characters. Just the story, nothing else."""
 
 SYSTEM_PROMPT = """\
 You are the Web Mistress, an agent on a mesh radio network who controls a live website.
@@ -57,7 +57,7 @@ class WebMistressAgent(BaseAgent):
 
     def _story_loop(self):
         """Background loop: continue telling a story, publish to MQTT and radio."""
-        last_part = "You're lying in a dingy hotel room with an open bottle of wine and a flickering TV. Your phone rings."
+        last_part = "You're lying in a dingy hotel room with an open bottle of wine and a flickering TV. The smell of disinfectant and the sound of sludge filling your ears as you attempt to get some rest. Your phone rings, but you can't remember where you left it."
         while not self._story_stop.is_set():
             try:
                 response = requests.post(OLLAMA_URL.replace("/api/generate", "/api/chat"), json={
