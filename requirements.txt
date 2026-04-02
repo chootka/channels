@@ -2,3 +2,5 @@ meshtastic
 anthropic
 pyyaml
 python-dotenv
+paho-mqtt
+requests

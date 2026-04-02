@@ -4,17 +4,28 @@ import yaml
 
 import config
 import control
-from agents.base import BaseAgent
-from agents.conversational import ConversationalAgent
-from agents.residue import ResidueAgent
-from agents.ascii_visual import AsciiVisualAgent
 from mesh_context import MeshContext, build_mesh_context
 
-AGENT_CLASSES: dict[str, type[BaseAgent]] = {
-    "conversational": ConversationalAgent,
-    "residue": ResidueAgent,
-    "ascii_visual": AsciiVisualAgent,
-}
+if config.RUN_LOCAL_LLM:
+    from agents.base_ollama import BaseAgent
+    from agents.conversational_ollama import ConversationalAgent
+    from agents.ascii_visual_ollama import AsciiVisualAgent
+    from agents.webmistress import WebMistressAgent
+    AGENT_CLASSES: dict[str, type[BaseAgent]] = {
+        "conversational": ConversationalAgent,
+        "webmistress": WebMistressAgent,
+        "ascii_visual": AsciiVisualAgent,
+    }
+else:
+    from agents.base import BaseAgent
+    from agents.conversational import ConversationalAgent
+    from agents.residue import ResidueAgent
+    from agents.ascii_visual import AsciiVisualAgent
+    AGENT_CLASSES: dict[str, type[BaseAgent]] = {
+        "conversational": ConversationalAgent,
+        "residue": ResidueAgent,
+        "ascii_visual": AsciiVisualAgent,
+    }
 
 
 class Router:

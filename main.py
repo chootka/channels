@@ -76,6 +76,8 @@ def main():
     else:
         interface = meshtastic.serial_interface.SerialInterface()
 
+    mode = "LOCAL Ollama" if config.RUN_LOCAL_LLM else "Claude API"
+    print(f"[main] Using {mode}.")
     print("[main] Listening for messages. Ctrl+C to quit.")
 
     # Keep the main thread alive
