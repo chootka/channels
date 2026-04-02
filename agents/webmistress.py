@@ -79,7 +79,7 @@ class WebMistressAgent(BaseAgent):
                     last_part = part
             except Exception as e:
                 print(f"[storytime] Error: {e}")
-            self._story_stop.wait(15)
+            self._story_stop.wait(5)
 
     def _start_story(self, interface=None, channel_index=None):
         if self._story_thread and self._story_thread.is_alive():
