@@ -28,3 +28,8 @@ CONTROL_STATE_FILE = os.path.join(LOG_DIR, "control_state.json")
 
 # Channel config
 CHANNELS_FILE = os.path.join(os.path.dirname(__file__), _env.get("CHANNELS_FILE", "channels.yaml"))
+
+# Active channels — comma-separated list of channel indices to enable
+# e.g. ACTIVE_CHANNELS=4,5 means only channels 4 and 5 will respond
+# Leave empty or unset to enable all channels in the YAML file
+ACTIVE_CHANNELS = _env.get("ACTIVE_CHANNELS", "")

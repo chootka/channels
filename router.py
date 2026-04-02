@@ -40,8 +40,15 @@ class Router:
         with open(config.CHANNELS_FILE, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
+        # Filter to active channels if configured
+        active = set()
+        if config.ACTIVE_CHANNELS:
+            active = {int(x.strip()) for x in config.ACTIVE_CHANNELS.split(",") if x.strip()}
+
         for idx_str, ch_cfg in data.get("channels", {}).items():
             idx = int(idx_str)
+            if active and idx not in active:
+                continue
             agent_type = ch_cfg.get("agent", "conversational")
             if agent_type == "admin":
                 self._admin_channels.add(idx)
