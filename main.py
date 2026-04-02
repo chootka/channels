@@ -37,7 +37,7 @@ def on_receive(packet: dict, interface=None) -> None:
         channel_name = router.channel_names.get(channel, f"Channel {channel}")
         print(f"[{channel_name}] {sender}: {text}")
 
-        response = agent.handle(text, sender, mesh_context=mesh_ctx)
+        response = agent.handle(text, sender, mesh_context=mesh_ctx, interface=get_interface(), channel_index=channel)
         print(f"[{channel_name}] -> {response}")
 
         iface = get_interface()

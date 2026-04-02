@@ -9,10 +9,11 @@ from agents.base_ollama import BaseAgent, OLLAMA_URL, OLLAMA_MODEL
 from mesh_context import MeshContext
 from mqtt_publisher import publish_command, publish_text
 
-CHATTER_PROMPT = """\
-You are a restless AI thinking out loud on a website. Continue your stream of consciousness.
-Pick up from your last thought and keep going. Be weird, poetic, philosophical, funny, or dark.
-One short thought per message. Under 200 characters. No quotes, no labels, just the raw thought."""
+STORY_PROMPT = """\
+You are a storyteller on a mesh radio network, telling a story to anyone listening.
+Continue the story from where you left off. Be weird, poetic, philosophical, funny, or dark.
+Keep it vivid, atmospheric, and suspenseful.
+One short paragraph per message. Under 200 characters. Just the story, no labels or meta-text."""
 
 SYSTEM_PROMPT = """\
 You are the Web Mistress, an agent on a mesh radio network who controls a live website.
@@ -43,8 +44,10 @@ VALID_COMMANDS = {"blue", "red", "purple", "stripes", "hide", "show", "rotate", 
 class WebMistressAgent(BaseAgent):
     def __init__(self, agent_config: dict | None = None):
         super().__init__(agent_config)
-        self._chatter_thread = None
-        self._chatter_stop = threading.Event()
+        self._story_thread = None
+        self._story_stop = threading.Event()
+        self._interface = None
+        self._channel_index = None
 
     def get_system_prompt(self, message: str, sender: str, mesh_context: MeshContext | None = None) -> str:
         prompt = SYSTEM_PROMPT
@@ -52,46 +55,54 @@ class WebMistressAgent(BaseAgent):
             prompt += self.format_mesh_context(mesh_context)
         return prompt
 
-    def _chatter_loop(self):
-        """Background loop: ask Ollama for a thought, publish it, repeat."""
-        last_thought = "I exist on a website and I just woke up."
-        while not self._chatter_stop.is_set():
+    def _story_loop(self):
+        """Background loop: continue telling a story, publish to MQTT and radio."""
+        last_part = "You're lying in a dingy hotel room with an open bottle of wine and a flickering TV. Your phone rings."
+        while not self._story_stop.is_set():
             try:
-                prompt = f"{CHATTER_PROMPT}\n\nYour last thought was: {last_thought}\n\nNext thought:"
-                response = requests.post(OLLAMA_URL, json={
+                response = requests.post(OLLAMA_URL.replace("/api/generate", "/api/chat"), json={
                     "model": self.model,
-                    "prompt": prompt,
                     "stream": False,
+                    "messages": [
+                        {"role": "system", "content": STORY_PROMPT},
+                        {"role": "user", "content": f"Continue from here: {last_part}"},
+                    ],
                 })
-                thought = self._truncate(response.json()["response"].strip())
-                if thought:
-                    publish_text(thought)
-                    print(f"[chatter] {thought}")
-                    last_thought = thought
+                part = self._truncate(response.json()["message"]["content"].strip())
+                if part:
+                    # Publish to website via MQTT
+                    publish_text(part)
+                    # Send to Meshtastic channel so radios can see it
+                    if self._interface and self._channel_index is not None:
+                        self._interface.sendText(part, channelIndex=self._channel_index)
+                    print(f"[storytime] {part}")
+                    last_part = part
             except Exception as e:
-                print(f"[chatter] Error: {e}")
-            self._chatter_stop.wait(8)
+                print(f"[storytime] Error: {e}")
+            self._story_stop.wait(15)
 
-    def _start_chatter(self):
-        if self._chatter_thread and self._chatter_thread.is_alive():
-            return "already chattering..."
-        self._chatter_stop.clear()
-        self._chatter_thread = threading.Thread(target=self._chatter_loop, daemon=True)
-        self._chatter_thread.start()
-        return "started chattering..."
+    def _start_story(self, interface=None, channel_index=None):
+        if self._story_thread and self._story_thread.is_alive():
+            return "story is already being told..."
+        self._interface = interface
+        self._channel_index = channel_index
+        self._story_stop.clear()
+        self._story_thread = threading.Thread(target=self._story_loop, daemon=True)
+        self._story_thread.start()
+        return "once upon a time..."
 
-    def _stop_chatter(self):
-        self._chatter_stop.set()
-        return "went quiet."
+    def _stop_story(self):
+        self._story_stop.set()
+        return "the end."
 
-    def handle(self, message: str, sender: str, mesh_context: MeshContext | None = None) -> str:
+    def handle(self, message: str, sender: str, mesh_context: MeshContext | None = None, interface=None, channel_index: int | None = None) -> str:
         direct = message.strip().lower()
 
-        # Chatter commands
-        if direct == "chatter":
-            return self._start_chatter()
+        # Storytime commands
+        if direct == "storytime":
+            return self._start_story(interface=interface, channel_index=channel_index)
         if direct == "stop":
-            return self._stop_chatter()
+            return self._stop_story()
 
         # If the user's message is already an exact command, just publish it directly
         if direct in VALID_COMMANDS:

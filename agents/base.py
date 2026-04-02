@@ -23,7 +23,7 @@ class BaseAgent:
     def get_user_content(self, message: str, sender: str) -> str:
         return message
 
-    def handle(self, message: str, sender: str, mesh_context: MeshContext | None = None) -> str:
+    def handle(self, message: str, sender: str, mesh_context: MeshContext | None = None, **kwargs) -> str:
         response = self.client.messages.create(
             model=self.model,
             max_tokens=self.max_tokens,

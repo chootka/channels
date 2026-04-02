@@ -25,7 +25,7 @@ class BaseAgent:
     def get_user_content(self, message: str, sender: str) -> str:
         return message
 
-    def handle(self, message: str, sender: str, mesh_context: MeshContext | None = None) -> str:
+    def handle(self, message: str, sender: str, mesh_context: MeshContext | None = None, **kwargs) -> str:
         system_prompt = self.get_system_prompt(message, sender, mesh_context)
         user_content = self.get_user_content(message, sender)
 
